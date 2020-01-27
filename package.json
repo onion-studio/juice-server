@@ -1,0 +1,24 @@
+{
+  "name": "juice-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev:build": "tsc -w",
+    "dev:up": "nodemon dist/server",
+    "start": "node dist/server"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^4.17.2",
+    "@types/node": "^13.5.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "nodemon": "^2.0.2",
+    "typescript": "^3.7.5"
+  }
+}
