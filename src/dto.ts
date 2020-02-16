@@ -12,10 +12,15 @@ export interface Category {
   type: CategoryType
 }
 
-interface RespondentData {
+export interface RespondentData {
   email: string
   age: number
+}
 
+export interface Pledge {
+  id: number,
+  title: string,
+  summary: string
 }
 
 // async function findCategories(): Promise<Category[]> {

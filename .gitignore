@@ -1,3 +1,6 @@
+*.pem
+config.ts
+
 # dotenv
 .env
 
