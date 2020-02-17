@@ -4,21 +4,21 @@ import Bluebird from "bluebird";
 import * as config from "./config";
 import { ENV } from "./constants";
 
-export const pool:Promise<mysql.Pool> = mysql.createPool(config.mysql);
+export const pool: Promise<mysql.Pool> = mysql.createPool(config.mysql);
 
 export type DBConnection = {
   commit: () => Promise<void>;
-  query: (q: string, q_args?: any[]) => Promise<void>;
+  query: (q: string, args?: any[]) => Promise<void>;
 };
 
 export const getSqlConnection = async (pool: any): Promise<DBConnection> => {
-  const new_pool = await pool;
-  return new_pool.getConnection().disposer((connection: any) => {
-    new_pool.releaseConnection(connection);
+  const newPool = await pool;
+  return newPool.getConnection().disposer((connection: any) => {
+    newPool.releaseConnection(connection);
   });
 };
 
-const is_live = process.env.NODE_ENV === ENV.production;
+const isLive = process.env.NODE_ENV === ENV.production;
 
 const query = (pool: any) => {
   let con: any = null;
@@ -43,7 +43,7 @@ const query = (pool: any) => {
         throw err;
       });
     }).catch((err: any) => {
-      if (!is_live && err.code === "ETIMEDOUT") {
+      if (!isLive && err.code === "ETIMEDOUT") {
         return new Bluebird((resolve: any) => {
           setTimeout(() => {
             resolve(run(qs, params));
@@ -67,15 +67,15 @@ const query = (pool: any) => {
   return run;
 };
 
-const _pool_query = (pool: any) => {
-  const active_query = query(pool);
-  let query_jobs: any[] = [];
+const _poolQuery = (pool: any) => {
+  const activeQuery = query(pool);
+  let queryJobs: any[] = [];
   return (qs: string, params: any[]) => {
-    query_jobs = [active_query(qs, params)];
-    return Bluebird.all(query_jobs).then((results: any) => {
-      return results[0]
+    queryJobs = [activeQuery(qs, params)];
+    return Bluebird.all(queryJobs).then((results: any) => {
+      return results[0];
     });
   };
 };
 
-export const pool_query = _pool_query(pool);
+export const poolQuery = _poolQuery(pool);

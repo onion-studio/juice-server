@@ -7,7 +7,8 @@
     "build": "tsc",
     "dev:build": "tsc -w",
     "dev:up": "nodemon dist/server",
-    "start": "node dist/server"
+    "start": "node dist/server",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx ."
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +24,8 @@
   },
   "devDependencies": {
     "@types/mysql": "^2.15.8",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
     "eslint": "^6.8.0",
     "nodemon": "^2.0.2",
     "typescript": "^3.7.5"

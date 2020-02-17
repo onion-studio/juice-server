@@ -3,6 +3,7 @@
 `npm run dev:build`
 `npm run dev:up`
 `npm run start`
+`npm run lint`
 
 # database.json
 

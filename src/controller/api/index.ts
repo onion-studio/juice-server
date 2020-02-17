@@ -1,5 +1,5 @@
-import * as pledges from './pledges'
+import * as pledges from "./pledges";
 
 export default {
-    pledges
-}
+  pledges
+};
