@@ -1,6 +1,6 @@
-import { poolQuery } from "../pool";
-import { Request, Response } from "express";
-import { Pledge } from "../dto";
+import { poolQuery } from '../pool';
+import { Request, Response } from 'express';
+import { Pledge } from '../dto';
 
 const get = async (req: Request, res: Response): Promise<void> => {
   const q = `

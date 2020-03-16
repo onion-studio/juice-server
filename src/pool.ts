@@ -1,8 +1,8 @@
-import * as mysql from "promise-mysql";
-import Bluebird from "bluebird";
+import * as mysql from 'promise-mysql';
+import Bluebird from 'bluebird';
 
-import * as config from "./config";
-import { ENV } from "./constants";
+import * as config from './config';
+import { ENV } from './constants';
 
 export const pool: Promise<mysql.Pool> = mysql.createPool(config.mysql);
 
@@ -26,24 +26,24 @@ const query = (pool: any) => {
     return Bluebird.using(getSqlConnection(pool), (connection: any) => {
       con = connection;
       return connection.query(qs, params).catch((err: any) => {
-        console.error("Query error", err.sqlMessage, err.sql);
+        console.error('Query error', err.sqlMessage, err.sql);
 
         const transactionStarted =
           err.sql &&
           err.sql
             .substring(0, 50)
-            .replace(/\s\s+/g, " ")
+            .replace(/\s\s+/g, ' ')
             .toUpperCase()
-            .indexOf("START TRANSACTION") > -1;
+            .indexOf('START TRANSACTION') > -1;
 
         if (transactionStarted) {
           connection.rollback();
-          console.error("Query rollback", err.sqlMessage, err.sql);
+          console.error('Query rollback', err.sqlMessage, err.sql);
         }
         throw err;
       });
     }).catch((err: any) => {
-      if (!isLive && err.code === "ETIMEDOUT") {
+      if (!isLive && err.code === 'ETIMEDOUT') {
         return new Bluebird((resolve: any) => {
           setTimeout(() => {
             resolve(run(qs, params));
@@ -51,7 +51,7 @@ const query = (pool: any) => {
         });
       }
 
-      if (err.code === "PROTOCOL_CONNECTION_LOST") {
+      if (err.code === 'PROTOCOL_CONNECTION_LOST') {
         if (con && con.end) {
           con.destroy();
           return new Bluebird((resolve: any) => {
@@ -70,7 +70,7 @@ const query = (pool: any) => {
 const _poolQuery = (pool: any) => {
   const activeQuery = query(pool);
   let queryJobs: any[] = [];
-  return (qs: string, params: any[]) => {
+  return (qs: string, params: any[] = []) => {
     queryJobs = [activeQuery(qs, params)];
     return Bluebird.all(queryJobs).then((results: any) => {
       return results[0];

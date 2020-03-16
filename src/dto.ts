@@ -1,9 +1,9 @@
 // Data Transfer Object
 
 export enum CategoryType {
-  job = "job",
-  interest = "interest",
-  issue = "issue"
+  job = 'job',
+  interest = 'interest',
+  issue = 'issue',
 }
 
 export interface Category {
