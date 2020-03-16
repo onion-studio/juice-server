@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { Pledge } from '../dto';
 
 const get = async (req: Request, res: Response): Promise<void> => {
+  const { issue_id } = req.query;
   const q = `
         select * from pledges;
     `;
@@ -16,5 +17,5 @@ const getPledgeById = async (req: Request, res: Response): Promise<void> => {
 
 export default {
   get,
-  getPledgeById
-}
+  getPledgeById,
+};

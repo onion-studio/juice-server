@@ -1,14 +1,21 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
+import issueLib from '../model/issues';
 
 const get = async (req: Request, res: Response): Promise<void> => {
-    // 추가 필요
-};
+  const { pledge_ids: pledgeIdsString } = req.query;
 
-const getIssuesById = async (req: Request, res: Response): Promise<void> => {
-    // 추가 필요
+  let issues;
+  if (pledgeIdsString) {
+    const pledgeIds = pledgeIdsString.split(',').map((id: string): number => Number(id));
+    issues = await issueLib.getIssuesByPledgeIds(pledgeIds);
+  } else {
+    issues = await issueLib.get();
+  }
+  res.json({
+    issues,
+  });
 };
 
 export default {
-    get,
-    getIssuesById
-}
+  get,
+};

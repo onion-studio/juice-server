@@ -23,6 +23,15 @@ export interface Pledge {
   summary: string;
 }
 
+export interface Issue {
+  id: number;
+  name: string;
+  summary: string;
+  tag1: string;
+  tag2: string;
+  tag3: string;
+}
+
 // async function findCategories(): Promise<Category[]> {
 //   const rows: Category[] = await mysqlPool.query(`select...`)
 //   return rows
