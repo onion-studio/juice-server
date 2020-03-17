@@ -15,6 +15,7 @@ app.use(limiter);
 
 app.get('/', (req, res) => res.send(`JUICE SERVER WORKS(env: ${process.env.NODE_ENV})`));
 app.get('/health', api.status);
+app.get('/init', api.init.get);
 app.get('/issues', api.issues.get);
 app.get('/pledges', api.pledges.get);
 app.get('/pledges/:id', api.pledges.getPledgeById);
