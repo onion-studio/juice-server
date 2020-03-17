@@ -32,6 +32,12 @@ export interface Issue {
   tag3: string;
 }
 
+export interface Result {
+  selected_issue_ids: Array<number>;
+  selected_pledge_ids: Array<number>;
+  respondent_id: number;
+}
+
 // async function findCategories(): Promise<Category[]> {
 //   const rows: Category[] = await mysqlPool.query(`select...`)
 //   return rows
