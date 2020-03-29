@@ -1,6 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-
+import cors from 'cors';
 import api from './controller';
 
 const app = express();
@@ -10,7 +10,12 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
 });
+const corsOptions = {
+  // origin: 'https://juice.vote',
+  optionsSuccessStatus: 200,
+};
 
+app.use(cors(corsOptions));
 app.use(limiter);
 
 app.get('/', (req, res) => res.send(`JUICE SERVER WORKS(env: ${process.env.NODE_ENV})`));
