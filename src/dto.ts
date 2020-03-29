@@ -12,7 +12,7 @@ export interface Category {
   type: CategoryType;
 }
 
-export interface RespondentData {
+export interface UserData {
   email: string;
   age: number;
 }
@@ -32,13 +32,56 @@ export interface Issue {
   tag3: string;
 }
 
+interface RespondentLog {
+  user_id: string;
+  nickname: string;
+  juice_id: number;
+  juice_name: string;
+}
+interface Pledges {
+  id: number;
+  title: string;
+  summary: string;
+  count: number;
+}
+interface Issues {
+  id: number;
+  name: string;
+}
 export interface Result {
-  selected_issue_ids: Array<number>;
-  selected_pledge_ids: Array<number>;
-  respondent_id: number;
+  respondentLog: RespondentLog;
+  pledges: Array<Pledges>;
+  issues: Array<Issues>;
 }
 
-// async function findCategories(): Promise<Category[]> {
-//   const rows: Category[] = await mysqlPool.query(`select...`)
-//   return rows
-// }
+export interface ResultInput {
+  userId: string;
+  issueIds: Array<number>;
+  pledgeIds: Array<number>;
+  ageStart: number;
+  ageEnd: number;
+  gender: string;
+  location: string;
+  nickname: string;
+}
+
+export interface PartyInfo {
+  party_id: number;
+  name: string;
+  type: string;
+}
+
+export interface AdditionalRespondentInfoInput {
+  userId: string;
+  identities: Array<string>;
+  email: string;
+}
+
+export interface Juice {
+  id: number;
+  party_id: number | null;
+  taste: string;
+  type: string;
+  name: string;
+  parties: Array<string>;
+}
