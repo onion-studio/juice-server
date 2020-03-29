@@ -1,45 +1,93 @@
 import { Request, Response } from 'express';
 import moment from 'moment';
 import resultLib from '../model/result';
+import { Juice } from '../dto';
+// import { ResultInput } from '../dto';
 
-const get = async (req: Request, res: Response): Promise<void> => {
+const get = async (req, res) => {
+  const { token } = req.query;
+  const result = await resultLib.get(token);
+  res.json({
+    result,
+  });
+};
+
+const getPledgesTotalCount = async (req: Request, res: Response): Promise<void> => {
+  const { ids: pledgeIdsString } = req.query;
+  if (!pledgeIdsString) {
+    res.status(401).send('No pledge ids');
+    return;
+  }
+  const pledgeIds = pledgeIdsString.split(',').map((id: string): number => Number(id));
+  const result = await resultLib.getPledgesTotalCount(pledgeIds);
+  res.json({
+    result,
+  });
+};
+
+const _getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
+  return await resultLib.getJuice(pledgeIds);
+};
+const getJuice = async (req: Request, res: Response): Promise<void> => {
   const { pledge_ids: pledgeIdsString } = req.query;
   if (!pledgeIdsString) {
     res.status(401).send('No pledge ids');
     return;
   }
   const pledgeIds = pledgeIdsString.split(',').map((id: string): number => Number(id));
-  const result = await resultLib.get(pledgeIds);
+  const result = await _getJuice(pledgeIds);
   res.json({
     result,
   });
 };
 
 const add = async (req: Request, res: Response): Promise<void> => {
-  const { token, timestamp, selected_pledge_ids: selectedPledgeIds, personal } = req.body;
-  if (!token) {
-    res.status(401).send('No token');
+  const {
+    token,
+    timestamp,
+    selected_issue_ids: selectedIssueIdsString,
+    selected_pledge_ids: selectedPledgeIdsString,
+    personal,
+  } = req.body;
+  if (!token || !timestamp) {
+    res.status(401).send('No token/timestamp');
+    return;
+  }
+  const timestampFromDb = await resultLib.auth(token);
+  if (!timestampFromDb) {
+    res.status(401).send('Token is not registered.');
     return;
   }
   const now: number = moment.now();
-  if (now - timestamp < 1 * 60 * 1000) {
-    res.status(403).send('Less than 1 minute passed. Please take your time.');
+  if (now - timestampFromDb < 1 * 20 * 1000) {
+    res.status(403).send('Less than 20 sec passed. Please take your time.');
     return;
   }
-  const result = await resultLib.add({
-    respondentId: token,
+  const selectedPledgeIds = selectedPledgeIdsString
+    .split(',')
+    .map((id: string): number => Number(id));
+  const selectedIssueIds = selectedIssueIdsString
+    .split(',')
+    .map((id: string): number => Number(id));
+
+  await resultLib.add({
+    userId: token,
+    issueIds: selectedIssueIds,
     pledgeIds: selectedPledgeIds,
-    age: personal.age,
+    ageStart: personal.ageStart,
+    ageEnd: personal.ageEnd,
     gender: personal.gender,
     location: personal.location,
-    occupation: personal.occupation,
+    nickname: personal.nickname,
   });
   res.json({
-    result,
+    result: 'OK',
   });
 };
 
 export default {
   get,
+  getPledgesTotalCount,
   add,
+  getJuice,
 };

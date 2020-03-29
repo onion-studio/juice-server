@@ -19,7 +19,7 @@ const get = async (req: Request, res: Response): Promise<void> => {
 const getPledgeById = async (req: Request, res: Response): Promise<void> => {
   const { id: pledgeId } = req.params;
   const pledge = await pledgeLib.getPledgeById(Number(pledgeId));
-  res.json({ pledge });
+  res.json({ ...pledge });
 };
 
 export default {
