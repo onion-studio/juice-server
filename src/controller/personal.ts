@@ -1,14 +1,19 @@
 import { Request, Response } from 'express';
-
-const get = async (req: Request, res: Response): Promise<void> => {
-  // 추가 필요
-};
+import personalLib from '../model/personal';
 
 const add = async (req: Request, res: Response): Promise<void> => {
-  // 추가 필요
+  const { user_id: userId, identities: identitiesArray, email } = req.body;
+  const identities = identitiesArray.join(',');
+  await personalLib.add({
+    userId,
+    identities,
+    email,
+  });
+  res.json({
+    result: true,
+  });
 };
 
 export default {
-  get,
   add,
 };
