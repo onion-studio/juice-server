@@ -179,6 +179,10 @@ const add = async ({
   const juice = await getJuice(pledgeIds);
   const { id: juiceId } = juice;
 
+  const conn = await (await pool).getConnection();
+
+  await conn.beginTransaction();
+
   let q1 = `
     INSERT INTO pledge_selections (user_id, pledge_id) VALUES
   `;
@@ -203,7 +207,19 @@ const add = async ({
     INSERT INTO respondent_logs (user_id, is_voter, age_start, age_end, gender, location, juice_id, nickname) VALUES(?, ?, ?, ?, ?, ?, ?, ?);
   `;
   const args = [userId, isVoter, ageStart, ageEnd, gender, location, juiceId, nickname];
-  return Promise.all([poolQuery(q1, args2), poolQuery(q2, args3), poolQuery(q3, args)]);
+  try {
+    const result: Result[] = [];
+    result.push(await conn.query(q1, args2));
+    result.push(await conn.query(q2, args3));
+    result.push(await conn.query(q3, args));
+    await conn.commit();
+    return result;
+  } catch (e) {
+    await conn.rollback();
+    throw e;
+  } finally {
+    conn.release();
+  }
 };
 
 export default {
