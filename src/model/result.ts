@@ -1,4 +1,4 @@
-import { poolQuery } from '../pool';
+import { poolQuery, pool } from '../pool';
 import {
   Result,
   ResultInput,
@@ -90,13 +90,14 @@ const get = async (token: string): Promise<Result> => {
 
 const auth = async (token: string): Promise<number> => {
   const q = `
-    SELECT created_at
+    SELECT created_at, id
     FROM users
     WHERE uuid = ?
   `;
   const arg = [token];
   const row = await poolQuery(q, arg);
-  return row.length ? null : row[0].created_at;
+  console.log(row);
+  return row.length === 0 ? null : row[0];
 };
 
 const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
@@ -173,41 +174,36 @@ const add = async ({
   ageEnd,
   gender,
   location,
+  isVoter,
 }: ResultInput): Promise<Result[]> => {
   const juice = await getJuice(pledgeIds);
   const { id: juiceId } = juice;
 
-  let q = `
-  START TRANSACTION;
-    INSERT INTO pledge_selections
-    VALUES
+  let q1 = `
+    INSERT INTO pledge_selections (user_id, pledge_id) VALUES
   `;
   const args2 = pledgeIds.reduce((acc: any, pledgeId, index) => {
-    if (index < pledgeIds.length - 1) q += ` (user_id = ?, pledge_id = ?),`;
+    if (index < pledgeIds.length - 1) q1 += `(?, ?), `;
     acc.push(userId);
     acc.push(pledgeId);
     return acc;
   }, []);
-  q += ` (user_id = ?, pledge_id = ?);`;
-  q += `
-    INSERT INTO issue_selections
-    VALUES
+  q1 += `(?, ?);`;
+  let q2 = `
+    INSERT INTO issue_selections (user_id, issue_id) VALUES
   `;
   const args3 = issueIds.reduce((acc: any, issueId, index) => {
-    if (index < issueIds.length - 1) q += ` (user_id = ?, issue_id = ?),`;
+    if (index < issueIds.length - 1) q2 += `(?, ?), `;
     acc.push(userId);
     acc.push(issueId);
     return acc;
   }, []);
-  q += ` (user_id = ?, issue_id = ?);`;
-  q += `
-    INSERT INTO respondent_logs
-    VALUES
-    (age_start = ?, age_end = ?, gender = ?, location = ?, user_id = ?, nickname = ?, juice_id = ?);
-  COMMIT;
+  q2 += `(?, ?);`;
+  const q3 = `
+    INSERT INTO respondent_logs (user_id, is_voter, age_start, age_end, gender, location, juice_id, nickname) VALUES(?, ?, ?, ?, ?, ?, ?, ?);
   `;
-  const args = [...args2, ...args3, ageStart, ageEnd, gender, location, userId, nickname, juiceId];
-  return await poolQuery(q, args);
+  const args = [userId, isVoter, ageStart, ageEnd, gender, location, juiceId, nickname];
+  return Promise.all([poolQuery(q1, args2), poolQuery(q2, args3), poolQuery(q3, args)]);
 };
 
 export default {

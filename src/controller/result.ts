@@ -53,12 +53,13 @@ const add = async (req: Request, res: Response): Promise<void> => {
     res.status(401).send('No token/timestamp');
     return;
   }
-  const timestampFromDb = await resultLib.auth(token);
-  if (!timestampFromDb) {
+  const row = await resultLib.auth(token);
+  if (!row) {
     res.status(401).send('Token is not registered.');
     return;
   }
   const now: number = moment.now();
+  const { created_at: timestampFromDb, id: userId } = row;
   if (now - timestampFromDb < 1 * 20 * 1000) {
     res.status(403).send('Less than 20 sec passed. Please take your time.');
     return;
@@ -71,7 +72,7 @@ const add = async (req: Request, res: Response): Promise<void> => {
     .map((id: string): number => Number(id));
 
   await resultLib.add({
-    userId: token,
+    userId,
     issueIds: selectedIssueIds,
     pledgeIds: selectedPledgeIds,
     ageStart: personal.ageStart,
@@ -79,6 +80,7 @@ const add = async (req: Request, res: Response): Promise<void> => {
     gender: personal.gender,
     location: personal.location,
     nickname: personal.nickname,
+    isVoter: personal.isVoter,
   });
   res.json({
     result: 'OK',
