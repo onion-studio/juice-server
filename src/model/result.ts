@@ -78,8 +78,9 @@ const _getIssues = async (userId: number): Promise<Issues> => {
 
 const get = async (token: string): Promise<Result> => {
   const respondentLog = await _getRespondentLog(token);
+  console.log(respondentLog);
   const { user_id: userId } = respondentLog;
-  Promise.all([_getPledges(userId), _getIssues(userId)]).then(([pledges, issues]) => {
+  return Promise.all([_getPledges(userId), _getIssues(userId)]).then(([pledges, issues]) => {
     return {
       respondentLog,
       pledges,
