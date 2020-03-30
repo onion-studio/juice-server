@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import api from './controller';
 import path from 'path';
+import asyncHandler from 'express-async-handler';
 
 const app = express();
 const port = 3000;
@@ -19,18 +20,69 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(limiter);
+
 app.get('/', (req, res) => res.send(`JUICE SERVER WORKS(env: ${process.env.NODE_ENV})`));
 app.get('/health', api.status);
-app.post('/init', api.init.add);
-app.get('/issues', api.issues.get);
-app.get('/pledges', api.pledges.get);
-app.get('/pledges/:id', api.pledges.getPledgeById);
-app.get('/result', api.result.get);
-app.post('/result', api.result.add);
-app.get('/result/pledges', api.result.getPledgesTotalCount);
-app.get('/result/juice', api.result.getJuice);
-app.post('/personal', api.personal.add);
-app.get('/personal/count', api.personal.getIdentitiesCount);
+app.post(
+  '/init',
+  asyncHandler(async (req, res) => {
+    await api.init.add(req, res);
+  }),
+);
+app.get(
+  '/issues',
+  asyncHandler(async (req, res) => {
+    await api.issues.get(req, res);
+  }),
+);
+app.get(
+  '/pledges',
+  asyncHandler(async (req, res) => {
+    await api.pledges.get(req, res);
+  }),
+);
+app.get(
+  '/pledges/:id',
+  asyncHandler(async (req, res) => {
+    await api.pledges.getPledgeById(req, res);
+  }),
+);
+app.get(
+  '/result',
+  asyncHandler(async (req, res) => {
+    await api.result.get(req, res);
+  }),
+);
+app.post(
+  '/result',
+  asyncHandler(async (req, res) => {
+    await api.result.add(req, res);
+  }),
+);
+app.get(
+  '/result/pledges',
+  asyncHandler(async (req, res) => {
+    await api.result.getPledgesTotalCount(req, res);
+  }),
+);
+app.get(
+  '/result/juice',
+  asyncHandler(async (req, res) => {
+    await api.result.getJuice(req, res);
+  }),
+);
+app.post(
+  '/personal',
+  asyncHandler(async (req, res) => {
+    await api.personal.add(req, res);
+  }),
+);
+app.get(
+  '/personal/count',
+  asyncHandler(async (req, res) => {
+    await api.personal.getIdentitiesCount(req, res);
+  }),
+);
 
 if (process.env.NODE_ENV === 'production') {
   require('greenlock-express')
