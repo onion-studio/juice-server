@@ -2,7 +2,7 @@ import { poolQuery, pool } from '../pool';
 import {
   Result,
   ResultInput,
-  PartyInfo,
+  PartyByPledgeId,
   Juice,
   Pledges,
   Issues,
@@ -10,7 +10,7 @@ import {
   Pledge,
   PledgeWithCount,
   CountForPledge,
-  PartiesInfo,
+  PartiesWithVotesMap,
   Auth,
 } from '../dto';
 import _ from 'lodash';
@@ -106,67 +106,70 @@ const auth = async (token: string): Promise<Auth> => {
 };
 
 const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
-  const q1 = `
-    SELECT 
-      pm.party_id, p.name, p.type
+  const qParty = `
+    SELECT pm.party_id AS id, p.name, p.type
     FROM pledge_party_map pm
     INNER JOIN parties p
     ON p.id = pm.party_id
     WHERE pm.pledge_id IN ( ? );
   `;
   const args = [pledgeIds];
-  const rows: PartyInfo[] = await poolQuery(q1, args);
-  const partiesInfo: PartiesInfo = {};
-  for (const row of rows) {
-    partiesInfo[row.party_id] = {
-      id: row.party_id,
-      name: row.name,
-      type: row.type,
-      count: partiesInfo[row.party_id] == null ? 1 : partiesInfo[row.party_id].count + 1,
+  const partiesByPledge: PartyByPledgeId[] = await poolQuery(qParty, args);
+
+  const partiesWithVotesMap: PartiesWithVotesMap = {};
+  for (const p of partiesByPledge) {
+    partiesWithVotesMap[p.id] = {
+      id: p.id,
+      name: p.name,
+      type: p.type,
+      voteCount: partiesWithVotesMap[p.id] == null ? 1 : partiesWithVotesMap[p.id].voteCount + 1,
     };
   }
-  let q2 = `
+
+  let qJuice = `
     SELECT *
     FROM juices
     WHERE taste = ? AND type = ?
   `;
-  const finalResult = [];
-  const result = _.sortBy(partiesInfo, ['count']);
-  if (result[result.length - 1].count !== result[result.length - 2].count) {
-    if (result[result.length - 1].count / rows.length > 0.5) {
-      const { id: partyId } = result[result.length - 1];
-      finalResult.push('strong');
-      finalResult.push('none');
-      q2 += ` AND party_id = ?`;
-      finalResult.push(partyId);
+
+  const argsJuice = [];
+
+  const partiesByVotes = _.sortBy(partiesWithVotesMap, ['voteCount']);
+  const mostVoted = partiesByVotes[partiesByVotes.length - 1];
+  const totalVoteCount = partiesByPledge.length;
+
+  const hasType = mostVoted.voteCount !== partiesByVotes[partiesByVotes.length - 2].voteCount;
+
+  if (hasType) {
+    const partiesByType = _.groupBy(partiesByPledge, 'type');
+    const isProgressive =
+      !partiesByType['보수'] || partiesByType['진보'].length > partiesByType['보수'].length;
+
+    if (isProgressive) {
+      argsJuice.push(
+        'none',
+        partiesByType['진보'].length / totalVoteCount > 0.666 ? 'progressive' : 'mix',
+      );
     } else {
-      const { id: partyId } = result[result.length - 1];
-      finalResult.push('weak');
-      finalResult.push('none');
-      q2 += ` AND party_id = ?`;
-      finalResult.push(partyId);
+      argsJuice.push(
+        'none',
+        partiesByType['보수'].length / totalVoteCount > 0.666 ? 'conservative' : 'mix',
+      );
     }
   } else {
-    const result2 = _.groupBy(rows, 'type');
-    if (result2['진보'].length > result2['보수'].length) {
-      if (result2['진보'].length / rows.length > 0.666) {
-        finalResult.push('none');
-        finalResult.push('progressive');
-      } else {
-        finalResult.push('none');
-        finalResult.push('mix');
-      }
+    if (mostVoted.voteCount / totalVoteCount > 0.5) {
+      const { id: partyId } = mostVoted;
+      argsJuice.push('strong', 'none');
+      qJuice += ` AND party_id = ?`;
+      argsJuice.push(partyId);
     } else {
-      if (result2['보수'].length / rows.length > 0.666) {
-        finalResult.push('none');
-        finalResult.push('conservative');
-      } else {
-        finalResult.push('none');
-        finalResult.push('mix');
-      }
+      const { id: partyId } = mostVoted;
+      argsJuice.push('weak', 'none');
+      qJuice += ` AND party_id = ?`;
+      argsJuice.push(partyId);
     }
   }
-  const juices = await poolQuery(q2, finalResult);
+  const juices = await poolQuery(qJuice, argsJuice);
   return juices[0];
 };
 

@@ -2,11 +2,10 @@
 config.ts
 .idea
 greenlock.d/
+dist/
 
 # dotenv
 .env
-
-dist/
 
 # Logs
 logs

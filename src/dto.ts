@@ -77,8 +77,8 @@ export interface ResultInput {
   isVoter: number;
 }
 
-export interface PartyInfo {
-  party_id: number;
+export interface PartyByPledgeId {
+  id: number;
   name: string;
   type: string;
 }
@@ -102,10 +102,10 @@ export interface PartyWithCount {
   id: number;
   name: string;
   type: string;
-  count: number;
+  voteCount: number;
 }
 
-export interface PartiesInfo {
+export interface PartiesWithVotesMap {
   [key: number]: PartyWithCount;
 }
 
