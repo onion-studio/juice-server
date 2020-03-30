@@ -60,10 +60,10 @@ const add = async (req: Request, res: Response): Promise<void> => {
   }
   const now: number = moment.now();
   const { created_at: timestampFromDb, id: userId } = row;
-  if (now - timestampFromDb < 1 * 20 * 1000) {
-    res.status(403).send('Less than 20 sec passed. Please take your time.');
-    return;
-  }
+  // if (now - timestampFromDb < 1 * 20 * 1000) {
+  //   res.status(403).send('Less than 20 sec passed. Please take your time.');
+  //   return;
+  // }
   const selectedPledgeIds = selectedPledgeIdsString
     .split(',')
     .map((id: string): number => Number(id));
