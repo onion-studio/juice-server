@@ -3,7 +3,6 @@ import pledgeLib from '../model/pledges';
 
 const get = async (req: Request, res: Response): Promise<void> => {
   const { issue_ids: IssueIdsString } = req.query;
-
   let pledges;
   if (IssueIdsString) {
     const IssueIds = IssueIdsString.split(',').map((id: string): number => Number(id));

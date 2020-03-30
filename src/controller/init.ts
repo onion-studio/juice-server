@@ -13,9 +13,9 @@ const add = async (req: Request, res: Response): Promise<void> => {
       timestamp: now,
     });
   } catch (e) {
-    throw {
+    res.status(500).json({
       message: e,
-    };
+    });
   }
 };
 

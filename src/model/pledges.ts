@@ -35,7 +35,7 @@ const getPledgeById = async (pledgeId: number): Promise<Pledge> => {
 `;
   const args = [pledgeId];
   const row = await poolQuery(q, args);
-  return row[0];
+  return row.length > 0 ? row[0] : row;
 };
 
 export default {
