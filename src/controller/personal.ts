@@ -1,11 +1,18 @@
 import { Request, Response } from 'express';
 import personalLib from '../model/personal';
 
+const getIdentitiesCount = async (req: Request, res: Response): Promise<void> => {
+  const opts = req.query;
+  const count = await personalLib.getCountForIdentities(opts);
+  res.json({
+    count,
+  });
+};
+
 const add = async (req: Request, res: Response): Promise<void> => {
-  const { user_id: userId, identities: identitiesArray, email } = req.body;
-  const identities = identitiesArray.join(',');
+  const { token, identities, email } = req.body;
   await personalLib.add({
-    userId,
+    token,
     identities,
     email,
   });
@@ -16,4 +23,5 @@ const add = async (req: Request, res: Response): Promise<void> => {
 
 export default {
   add,
+  getIdentitiesCount,
 };

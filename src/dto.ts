@@ -1,17 +1,5 @@
 // Data Transfer Object
 
-export enum CategoryType {
-  job = 'job',
-  interest = 'interest',
-  issue = 'issue',
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  type: CategoryType;
-}
-
 export interface UserData {
   email: string;
   age: number;
@@ -40,7 +28,7 @@ export interface Issue {
   summary: string;
   tag1: string;
   tag2: string;
-  tag3: string;
+  tag3?: string;
 }
 
 export interface RespondentLog {
@@ -84,7 +72,7 @@ export interface PartyByPledgeId {
 }
 
 export interface AdditionalRespondentInfoInput {
-  userId: string;
+  token: string;
   identities: Array<string>;
   email: string;
 }
@@ -112,4 +100,23 @@ export interface PartiesWithVotesMap {
 export interface Auth {
   created_at: number;
   id: number;
+}
+
+export interface IdentityInput {
+  smallBusinessJob?: number;
+  majorBusinessJob?: number;
+  jobSeeker?: number;
+  student?: number;
+  selfEmployed?: number;
+  fullTimeWorker?: number;
+  temporaryWorker?: number;
+  partisan?: number;
+  infantCarer?: number;
+  publicJob?: number;
+  married?: number;
+  singleHousehold?: number;
+}
+
+export interface CountForIdentities {
+  [key: string]: number;
 }

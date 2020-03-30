@@ -30,6 +30,7 @@ app.post('/result', api.result.add);
 app.get('/result/pledges', api.result.getPledgesTotalCount);
 app.get('/result/juice', api.result.getJuice);
 app.post('/personal', api.personal.add);
+app.get('/personal/count', api.personal.getIdentitiesCount);
 
 if (process.env.NODE_ENV === 'production') {
   require('greenlock-express')
