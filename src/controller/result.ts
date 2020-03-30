@@ -58,36 +58,39 @@ const add = async (req: Request, res: Response): Promise<void> => {
     res.status(401).send('Token is not registered.');
     return;
   }
-  // const now: number = moment.now();
-  const {
-    // created_at: timestampFromDb,
-    id: userId,
-  } = row;
-  // if (now - timestampFromDb < 1 * 20 * 1000) {
-  //   res.status(403).send('Less than 20 sec passed. Please take your time.');
-  //   return;
-  // }
+  const now: number = moment.now();
+  const { created_at: timestampFromDb, id: userId } = row;
+  // 2초보다 적으면 동작하지 않음.
+  if (now - timestampFromDb < 1 * 2 * 1000) {
+    res.status(403).send('Less than 2 sec passed. Please take your time.');
+    return;
+  }
   const selectedPledgeIds = selectedPledgeIdsString
     .split(',')
     .map((id: string): number => Number(id));
   const selectedIssueIds = selectedIssueIdsString
     .split(',')
     .map((id: string): number => Number(id));
-
-  await resultLib.add({
-    userId,
-    issueIds: selectedIssueIds,
-    pledgeIds: selectedPledgeIds,
-    ageStart: personal.ageStart,
-    ageEnd: personal.ageEnd,
-    gender: personal.gender,
-    location: personal.location,
-    nickname: personal.nickname,
-    isVoter: personal.isVoter,
-  });
-  res.json({
-    result: 'OK',
-  });
+  try {
+    await resultLib.add({
+      userId,
+      issueIds: selectedIssueIds,
+      pledgeIds: selectedPledgeIds,
+      ageStart: personal.ageStart,
+      ageEnd: personal.ageEnd,
+      gender: personal.gender,
+      location: personal.location,
+      nickname: personal.nickname,
+      isVoter: personal.isVoter,
+    });
+    res.json({
+      result: 'OK',
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: e,
+    });
+  }
 };
 
 export default {

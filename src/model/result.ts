@@ -101,7 +101,6 @@ const auth = async (token: string): Promise<Auth> => {
   `;
   const arg = [token];
   const row = await poolQuery(q, arg);
-  console.log(row);
   return row.length === 0 ? null : row[0];
 };
 
@@ -184,9 +183,6 @@ const add = async ({
   location,
   isVoter,
 }: ResultInput): Promise<Result[]> => {
-  const juice = await getJuice(pledgeIds);
-  const { id: juiceId } = juice;
-
   const conn = await (await pool).getConnection();
 
   await conn.beginTransaction();
@@ -196,8 +192,7 @@ const add = async ({
   `;
   const args2 = pledgeIds.reduce((acc: number[], pledgeId, index) => {
     if (index < pledgeIds.length - 1) q1 += `(?, ?), `;
-    acc.push(userId);
-    acc.push(pledgeId);
+    acc.push(userId, pledgeId);
     return acc;
   }, []);
   q1 += `(?, ?);`;
@@ -206,13 +201,17 @@ const add = async ({
   `;
   const args3 = issueIds.reduce((acc: number[], issueId, index) => {
     if (index < issueIds.length - 1) q2 += `(?, ?), `;
-    acc.push(userId);
-    acc.push(issueId);
+    acc.push(userId, issueId);
     return acc;
   }, []);
   q2 += `(?, ?);`;
+
+  const juice = await getJuice(pledgeIds);
+  const { id: juiceId } = juice;
   const q3 = `
-    INSERT INTO respondent_logs (user_id, is_voter, age_start, age_end, gender, location, juice_id, nickname) VALUES(?, ?, ?, ?, ?, ?, ?, ?);
+    INSERT INTO respondent_logs 
+    (user_id, is_voter, age_start, age_end, gender, location, juice_id, nickname) 
+    VALUES(?, ?, ?, ?, ?, ?, ?, ?);
   `;
   const args = [userId, isVoter, ageStart, ageEnd, gender, location, juiceId, nickname];
   try {
