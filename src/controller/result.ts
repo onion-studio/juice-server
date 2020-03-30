@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import moment from 'moment';
 import resultLib from '../model/result';
-import { Juice } from '../dto';
+import { Juice, Auth } from '../dto';
 // import { ResultInput } from '../dto';
 
-const get = async (req, res) => {
+const get = async (req: Request, res: Response): Promise<void> => {
   const { token } = req.query;
   const result = await resultLib.get(token);
   res.json({
@@ -53,13 +53,16 @@ const add = async (req: Request, res: Response): Promise<void> => {
     res.status(401).send('No token/timestamp');
     return;
   }
-  const row = await resultLib.auth(token);
+  const row: Auth = await resultLib.auth(token);
   if (!row) {
     res.status(401).send('Token is not registered.');
     return;
   }
-  const now: number = moment.now();
-  const { created_at: timestampFromDb, id: userId } = row;
+  // const now: number = moment.now();
+  const {
+    // created_at: timestampFromDb,
+    id: userId,
+  } = row;
   // if (now - timestampFromDb < 1 * 20 * 1000) {
   //   res.status(403).send('Less than 20 sec passed. Please take your time.');
   //   return;

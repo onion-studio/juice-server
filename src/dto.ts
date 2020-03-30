@@ -23,6 +23,17 @@ export interface Pledge {
   summary: string;
 }
 
+export interface PledgeWithCount {
+  id: number;
+  title: string;
+  summary: string;
+  count: number;
+}
+
+export interface CountForPledge {
+  [key: number]: number;
+}
+
 export interface Issue {
   id: number;
   name: string;
@@ -32,19 +43,19 @@ export interface Issue {
   tag3: string;
 }
 
-interface RespondentLog {
-  user_id: string;
+export interface RespondentLog {
+  user_id: number;
   nickname: string;
   juice_id: number;
   juice_name: string;
 }
-interface Pledges {
+export interface Pledges {
   id: number;
   title: string;
   summary: string;
   count: number;
 }
-interface Issues {
+export interface Issues {
   id: number;
   name: string;
 }
@@ -55,14 +66,15 @@ export interface Result {
 }
 
 export interface ResultInput {
-  userId: string;
-  issueIds: Array<number>;
-  pledgeIds: Array<number>;
+  userId: number;
+  issueIds: number[];
+  pledgeIds: number[];
   ageStart: number;
   ageEnd: number;
   gender: string;
   location: string;
   nickname: string;
+  isVoter: number;
 }
 
 export interface PartyInfo {
@@ -84,4 +96,20 @@ export interface Juice {
   type: string;
   name: string;
   parties: Array<string>;
+}
+
+export interface PartyWithCount {
+  id: number;
+  name: string;
+  type: string;
+  count: number;
+}
+
+export interface PartiesInfo {
+  [key: number]: PartyWithCount;
+}
+
+export interface Auth {
+  created_at: number;
+  id: number;
 }

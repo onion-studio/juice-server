@@ -8,10 +8,14 @@ import {
   Issues,
   RespondentLog,
   Pledge,
+  PledgeWithCount,
+  CountForPledge,
+  PartiesInfo,
+  Auth,
 } from '../dto';
 import _ from 'lodash';
 
-const getPledgesTotalCount = async (pledgeIds: Array<string>): Promise<unknown> => {
+const getPledgesTotalCount = async (pledgeIds: Array<number>): Promise<CountForPledge> => {
   let q = `SELECT`;
   q += pledgeIds.reduce((acc, pledgeId) => {
     if (acc.length > 0) acc += ',';
@@ -42,7 +46,7 @@ const _getRespondentLog = async (token: string): Promise<RespondentLog> => {
   const rows = await poolQuery(q, arg);
   return rows[0];
 };
-const _getPledges = async (userId: number): Promise<Pledges> => {
+const _getPledges = async (userId: number): Promise<Pledges[]> => {
   const q = `
   SELECT pledges.id, pledges.title, pledges.summary, ppm.party_id, pim.issue_id
   FROM pledge_selections ps
@@ -54,16 +58,17 @@ const _getPledges = async (userId: number): Promise<Pledges> => {
   `;
   const arg = [userId];
   const rows = await poolQuery(q, arg);
-  const pledgeIds = rows.map(r => r.id);
+  const pledgeIds: number[] = rows.map((r: Pledge): number => r.id);
   const pledgesTotalCount = await getPledgesTotalCount(pledgeIds);
-  console.log(pledgesTotalCount);
-  const pledges = rows.map(r => ({
-    ...r,
-    count: pledgesTotalCount[r.id],
-  }));
+  const pledges = rows.map(
+    (r: Pledge): PledgeWithCount => ({
+      ...r,
+      count: pledgesTotalCount[r.id],
+    }),
+  );
   return pledges;
 };
-const _getIssues = async (userId: number): Promise<Issues> => {
+const _getIssues = async (userId: number): Promise<Issues[]> => {
   const q = `
   SELECT issues.id, issues.name
   FROM issue_selections
@@ -78,7 +83,6 @@ const _getIssues = async (userId: number): Promise<Issues> => {
 
 const get = async (token: string): Promise<Result> => {
   const respondentLog = await _getRespondentLog(token);
-  console.log(respondentLog);
   const { user_id: userId } = respondentLog;
   return Promise.all([_getPledges(userId), _getIssues(userId)]).then(([pledges, issues]) => {
     return {
@@ -89,7 +93,7 @@ const get = async (token: string): Promise<Result> => {
   });
 };
 
-const auth = async (token: string): Promise<number> => {
+const auth = async (token: string): Promise<Auth> => {
   const q = `
     SELECT created_at, id
     FROM users
@@ -112,7 +116,7 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
   `;
   const args = [pledgeIds];
   const rows: PartyInfo[] = await poolQuery(q1, args);
-  const partiesInfo = {};
+  const partiesInfo: PartiesInfo = {};
   for (const row of rows) {
     partiesInfo[row.party_id] = {
       id: row.party_id,
@@ -187,7 +191,7 @@ const add = async ({
   let q1 = `
     INSERT INTO pledge_selections (user_id, pledge_id) VALUES
   `;
-  const args2 = pledgeIds.reduce((acc: any, pledgeId, index) => {
+  const args2 = pledgeIds.reduce((acc: number[], pledgeId, index) => {
     if (index < pledgeIds.length - 1) q1 += `(?, ?), `;
     acc.push(userId);
     acc.push(pledgeId);
@@ -197,7 +201,7 @@ const add = async ({
   let q2 = `
     INSERT INTO issue_selections (user_id, issue_id) VALUES
   `;
-  const args3 = issueIds.reduce((acc: any, issueId, index) => {
+  const args3 = issueIds.reduce((acc: number[], issueId, index) => {
     if (index < issueIds.length - 1) q2 += `(?, ?), `;
     acc.push(userId);
     acc.push(issueId);
