@@ -2,7 +2,6 @@
 config.ts
 .idea
 greenlock.d/
-!greenlock.d/config.json
 
 # dotenv
 .env
