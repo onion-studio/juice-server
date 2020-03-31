@@ -114,6 +114,7 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
   `;
   const args = [pledgeIds];
   const partiesByPledge: PartyByPledgeId[] = await poolQuery(qParty, args);
+  console.log('partiesByPledge: ', partiesByPledge);
 
   const partiesWithVotesMap: PartiesWithVotesMap = {};
   for (const p of partiesByPledge) {
@@ -124,6 +125,7 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
       voteCount: partiesWithVotesMap[p.id] == null ? 1 : partiesWithVotesMap[p.id].voteCount + 1,
     };
   }
+  console.log('partiesWithVotesMap: ', partiesWithVotesMap);
 
   let qJuice = `
     SELECT *
@@ -134,13 +136,18 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
   const argsJuice = [];
 
   const partiesByVotes = _.sortBy(partiesWithVotesMap, ['voteCount']);
+  console.log('partiesByVotes: ', partiesByVotes);
   const mostVoted = partiesByVotes[partiesByVotes.length - 1];
+  console.log('mostVoted: ', mostVoted);
   const totalVoteCount = partiesByPledge.length;
+  console.log('totalVoteCount: ', totalVoteCount);
 
-  const hasType = mostVoted.voteCount !== partiesByVotes[partiesByVotes.length - 2].voteCount;
+  const hasType = mostVoted.voteCount === partiesByVotes[partiesByVotes.length - 2].voteCount;
+  console.log('hasType: ', hasType);
 
   if (hasType) {
     const partiesByType = _.groupBy(partiesByPledge, 'type');
+    console.log('partiesByType: ', partiesByType);
     const isProgressive =
       !partiesByType['보수'] || partiesByType['진보'].length > partiesByType['보수'].length;
 
