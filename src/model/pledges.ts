@@ -4,10 +4,8 @@ import { Pledge } from '../dto';
 const get = async (): Promise<Pledge[]> => {
   const q = `
     SELECT
-    p.id, p.title, p.summary, pim.issue_id
-    FROM pledges p
-    INNER JOIN pledge_issue_map pim
-    WHERE pim.pledge_id = p.id
+    id, title, summary, issue_id
+    FROM pledges
 `;
   return await poolQuery(q);
 };
@@ -15,11 +13,9 @@ const get = async (): Promise<Pledge[]> => {
 const getPledgesByIssueIds = async (issueIds: Array<number>): Promise<Pledge[]> => {
   const q = `
     SELECT
-      p.id, p.title, p.summary, pim.issue_id
+      id, title, summary, issue_id
     FROM pledges p
-    INNER JOIN pledge_issue_map pim
-    ON pim.issue_id IN ( ? )
-    WHERE pim.pledge_id = p.id
+    WHERE issue_id IN ( ? )
   `;
   const args = [issueIds];
   return await poolQuery(q, args);
@@ -28,10 +24,9 @@ const getPledgesByIssueIds = async (issueIds: Array<number>): Promise<Pledge[]> 
 const getPledgeById = async (pledgeId: number): Promise<Pledge> => {
   const q = `
   SELECT
-    p.id, p.title, p.summary, pim.issue_id
-  FROM pledges p
-  INNER JOIN pledge_issue_map pim
-  WHERE pim.pledge_id = p.id
+    id, title, summary, issue_id
+  FROM pledges
+  WHERE id = ?
 `;
   const args = [pledgeId];
   const row = await poolQuery(q, args);

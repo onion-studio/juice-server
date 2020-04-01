@@ -48,12 +48,10 @@ const _getRespondentLog = async (token: string): Promise<RespondentLog> => {
 };
 const _getPledges = async (userId: number): Promise<Pledges[]> => {
   const q = `
-  SELECT pledges.id, pledges.title, pledges.summary, ppm.party_id, pim.issue_id
+  SELECT pledges.id, pledges.title, pledges.summary, pledges.party_id, pledges.issue_id
   FROM pledge_selections ps
   INNER JOIN pledges
-  INNER JOIN pledge_party_map ppm
-  INNER JOIN pledge_issue_map pim
-  ON ps.pledge_id = pledges.id AND ppm.pledge_id = pledges.id AND pim.pledge_id = pledges.id
+  ON ps.pledge_id = pledges.id
   WHERE ps.user_id = ?
   `;
   const arg = [userId];
@@ -106,11 +104,11 @@ const auth = async (token: string): Promise<Auth> => {
 
 const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
   const qParty = `
-    SELECT pm.party_id AS id, p.name, p.type
-    FROM pledge_party_map pm
-    INNER JOIN parties p
-    ON p.id = pm.party_id
-    WHERE pm.pledge_id IN ( ? );
+    SELECT pledges.party_id AS id, parties.name, parties.type
+    FROM pledges
+    INNER JOIN parties
+    ON pledges.party_id = parties.id
+    WHERE pledges.id IN ( ? );
   `;
   const args = [pledgeIds];
   const partiesByPledge: PartyByPledgeId[] = await poolQuery(qParty, args);

@@ -6,7 +6,7 @@ import path from 'path';
 import asyncHandler from 'express-async-handler';
 
 const app = express();
-const port = 3000;
+const port = 3003;
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
