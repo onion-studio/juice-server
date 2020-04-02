@@ -71,26 +71,20 @@ const add = async (req: Request, res: Response): Promise<void> => {
   const selectedIssueIds = selectedIssueIdsString
     .split(',')
     .map((id: string): number => Number(id));
-  try {
-    await resultLib.add({
-      userId,
-      issueIds: selectedIssueIds,
-      pledgeIds: selectedPledgeIds,
-      ageStart: personal.ageStart,
-      ageEnd: personal.ageEnd,
-      gender: personal.gender,
-      location: personal.location,
-      nickname: personal.nickname,
-      isVoter: personal.isVoter,
-    });
-    res.json({
-      result: 'OK',
-    });
-  } catch (e) {
-    res.status(500).json({
-      message: e,
-    });
-  }
+  await resultLib.add({
+    userId,
+    issueIds: selectedIssueIds,
+    pledgeIds: selectedPledgeIds,
+    ageStart: personal.ageStart,
+    ageEnd: personal.ageEnd,
+    gender: personal.gender,
+    location: personal.location,
+    nickname: personal.nickname,
+    isVoter: personal.isVoter,
+  });
+  res.json({
+    result: 'OK',
+  });
 };
 
 export default {

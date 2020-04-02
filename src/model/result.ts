@@ -140,10 +140,11 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
 
   if (hasType) {
     const partiesByType = _.groupBy(partiesByPledge, 'type');
-    const isProgressive =
-      !partiesByType['보수'] || partiesByType['진보'].length > partiesByType['보수'].length;
-
-    if (isProgressive) {
+    if (!partiesByType['보수']) {
+      argsJuice.push('none', 'progressive', 0);
+    } else if (!partiesByType['진보']) {
+      argsJuice.push('none', 'conservative', 0);
+    } else if (partiesByType['진보'] > partiesByType['보수']) {
       argsJuice.push(
         'none',
         partiesByType['진보'].length / totalVoteCount >= 0.66 ? 'progressive' : 'mix',
