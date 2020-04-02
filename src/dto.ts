@@ -88,7 +88,6 @@ export interface Juice {
 
 export interface PartyWithCount {
   id: number;
-  name: string;
   type: string;
   voteCount: number;
 }

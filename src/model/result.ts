@@ -10,6 +10,7 @@ import {
   Pledge,
   PledgeWithCount,
   CountForPledge,
+  PartyWithCount,
   PartiesWithVotesMap,
   Auth,
 } from '../dto';
@@ -104,7 +105,7 @@ const auth = async (token: string): Promise<Auth> => {
 
 const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
   const qParty = `
-    SELECT pledges.party_id AS id, parties.name, parties.type
+    SELECT pledges.party_id AS id, parties.type
     FROM pledges
     INNER JOIN parties
     ON pledges.party_id = parties.id
@@ -112,65 +113,56 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
   `;
   const args = [pledgeIds];
   const partiesByPledge: PartyByPledgeId[] = await poolQuery(qParty, args);
-  console.log('partiesByPledge: ', partiesByPledge);
+  const partiesWithVotesMap: PartyWithCount[] = _.chain(partiesByPledge)
+    .reduce((result: PartiesWithVotesMap, p) => {
+      result[p.id] = {
+        id: p.id,
+        type: p.type,
+        voteCount: result[p.id] == null ? 1 : result[p.id].voteCount + 1,
+      };
+      return result;
+    }, {})
+    .orderBy('voteCount', 'desc')
+    .value();
 
-  const partiesWithVotesMap: PartiesWithVotesMap = {};
-  for (const p of partiesByPledge) {
-    partiesWithVotesMap[p.id] = {
-      id: p.id,
-      name: p.name,
-      type: p.type,
-      voteCount: partiesWithVotesMap[p.id] == null ? 1 : partiesWithVotesMap[p.id].voteCount + 1,
-    };
-  }
-  console.log('partiesWithVotesMap: ', partiesWithVotesMap);
-
-  let qJuice = `
+  const qJuice = `
     SELECT *
     FROM juices
-    WHERE taste = ? AND type = ?
+    WHERE taste = ? AND type = ? AND party_id = ?;
   `;
 
   const argsJuice = [];
 
-  const partiesByVotes = _.sortBy(partiesWithVotesMap, ['voteCount']);
-  console.log('partiesByVotes: ', partiesByVotes);
-  const mostVoted = partiesByVotes[partiesByVotes.length - 1];
-  console.log('mostVoted: ', mostVoted);
+  const partiesByVotes = _.orderBy(partiesWithVotesMap, ['voteCount'], ['desc']);
   const totalVoteCount = partiesByPledge.length;
-  console.log('totalVoteCount: ', totalVoteCount);
-
-  const hasType = mostVoted.voteCount === partiesByVotes[partiesByVotes.length - 2].voteCount;
-  console.log('hasType: ', hasType);
+  const hasType =
+    partiesByVotes.length > 1 ? partiesByVotes[0].voteCount === partiesByVotes[1].voteCount : false;
 
   if (hasType) {
     const partiesByType = _.groupBy(partiesByPledge, 'type');
-    console.log('partiesByType: ', partiesByType);
     const isProgressive =
       !partiesByType['보수'] || partiesByType['진보'].length > partiesByType['보수'].length;
 
     if (isProgressive) {
       argsJuice.push(
         'none',
-        partiesByType['진보'].length / totalVoteCount > 0.666 ? 'progressive' : 'mix',
+        partiesByType['진보'].length / totalVoteCount >= 0.66 ? 'progressive' : 'mix',
+        0,
       );
     } else {
       argsJuice.push(
         'none',
-        partiesByType['보수'].length / totalVoteCount > 0.666 ? 'conservative' : 'mix',
+        partiesByType['보수'].length / totalVoteCount >= 0.66 ? 'conservative' : 'mix',
+        0,
       );
     }
   } else {
-    if (mostVoted.voteCount / totalVoteCount > 0.5) {
-      const { id: partyId } = mostVoted;
-      argsJuice.push('strong', 'none');
-      qJuice += ` AND party_id = ?`;
-      argsJuice.push(partyId);
+    if (partiesByVotes[0].voteCount / totalVoteCount >= 0.5) {
+      const { id: partyId } = partiesByVotes[0];
+      argsJuice.push('strong', 'none', partyId);
     } else {
-      const { id: partyId } = mostVoted;
-      argsJuice.push('weak', 'none');
-      qJuice += ` AND party_id = ?`;
-      argsJuice.push(partyId);
+      const { id: partyId } = partiesByVotes[0];
+      argsJuice.push('weak', 'none', partyId);
     }
   }
   const juices = await poolQuery(qJuice, argsJuice);
