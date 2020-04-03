@@ -13,8 +13,17 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
 });
+
+const whiteList = ['https://www.juice.vote', 'https://juice.vote', 'http://localhost:3000'];
 const corsOptions = {
-  // origin: 'https://juice.vote',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  origin: (origin: any, cb: any): void => {
+    if (whiteList.indexOf(origin) !== -1) {
+      cb(null, true);
+    } else {
+      cb(new Error('Not allowed by CORS'));
+    }
+  },
   optionsSuccessStatus: 200,
 };
 
