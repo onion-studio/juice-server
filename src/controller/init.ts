@@ -6,10 +6,8 @@ import initLib from '../model/init';
 const add = async (req: Request, res: Response): Promise<void> => {
   const token = uuidv1();
   const now = moment.utc().format();
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  const agent = req.header('User-Agent') || null;
   try {
-    await initLib.add(token, now, ip, agent);
+    await initLib.add(token, now);
     res.json({
       token,
       timestamp: now,

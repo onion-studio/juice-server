@@ -158,7 +158,7 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
       );
     }
   } else {
-    if (partiesByVotes[0].voteCount / totalVoteCount >= 0.5) {
+    if (partiesByVotes[0].voteCount / totalVoteCount >= 0.4) {
       const { id: partyId } = partiesByVotes[0];
       argsJuice.push('strong', 'none', partyId);
     } else {

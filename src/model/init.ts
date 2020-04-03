@@ -1,11 +1,11 @@
 import { poolQuery } from '../pool';
 
-const add = async (token: string, timestamp: string, ip, agent): Promise<void> => {
+const add = async (token: string, timestamp: string): Promise<void> => {
   const q = `
     INSERT INTO users (uuid, created_at, ip_address, browser)
-    VALUES ( ?, ?, ?, ? )
+    VALUES ( ?, ? )
   `;
-  const args = [token, timestamp, ip, agent];
+  const args = [token, timestamp];
   return await poolQuery(q, args);
 };
 
