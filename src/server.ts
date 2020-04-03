@@ -4,6 +4,7 @@ import cors from 'cors';
 import api from './controller';
 import path from 'path';
 import asyncHandler from 'express-async-handler';
+import logger from 'morgan';
 
 const app = express();
 const port = 3003;
@@ -20,6 +21,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(limiter);
+app.use(logger('combined'));
 
 app.get('/', (req, res) => res.send(`JUICE SERVER WORKS(env: ${process.env.NODE_ENV})`));
 app.get('/health', api.status);
