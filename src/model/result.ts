@@ -80,8 +80,9 @@ const _getIssues = async (userId: number): Promise<Issues[]> => {
   return rows;
 };
 
-const get = async (token: string): Promise<Result> => {
+const get = async (token: string): Promise<Result | null> => {
   const respondentLog = await _getRespondentLog(token);
+  if (!respondentLog.user_id) return null;
   const { user_id: userId } = respondentLog;
   return Promise.all([_getPledges(userId), _getIssues(userId)]).then(([pledges, issues]) => {
     return {

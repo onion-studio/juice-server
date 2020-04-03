@@ -7,9 +7,13 @@ import { Juice, Auth } from '../dto';
 const get = async (req: Request, res: Response): Promise<void> => {
   const { token } = req.query;
   const result = await resultLib.get(token);
-  res.json({
-    result,
-  });
+  if (result) {
+    res.json({
+      result,
+    });
+  } else {
+    res.status(500).send('Token is not matched.');
+  }
 };
 
 const getPledgesTotalCount = async (req: Request, res: Response): Promise<void> => {
