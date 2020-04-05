@@ -14,7 +14,12 @@ const limiter = rateLimit({
   max: 100,
 });
 
-const whiteList = ['https://www.juice.vote', 'https://juice.vote', 'http://localhost:3000'];
+const whiteList = [
+  'https://www.juice.vote',
+  'https://juice.vote',
+  'http://localhost:3000',
+  'http://192.168.21.9:3000',
+];
 const corsOptions = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   origin: (origin: any, cb: any): void => {
