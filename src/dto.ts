@@ -56,6 +56,7 @@ export interface Result {
 export interface ResultInput {
   userId: number;
   issueIds: number[];
+  issueIdsWithoutDeduction: number[] | null;
   pledgeIds: number[];
   ageStart: number;
   ageEnd: number;

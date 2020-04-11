@@ -175,6 +175,7 @@ const add = async ({
   userId,
   nickname,
   issueIds,
+  issueIdsWithoutDeduction,
   pledgeIds,
   ageStart,
   ageEnd,
@@ -212,12 +213,28 @@ const add = async ({
     (user_id, is_voter, age_start, age_end, gender, location, juice_id, nickname) 
     VALUES(?, ?, ?, ?, ?, ?, ?, ?);
   `;
+
   const args = [userId, isVoter, ageStart, ageEnd, gender, location, juiceId, nickname];
   try {
     const result: Result[] = [];
     result.push(await conn.query(q1, args2));
     result.push(await conn.query(q2, args3));
     result.push(await conn.query(q3, args));
+    if (issueIdsWithoutDeduction) {
+      let q4 = `
+      INSERT INTO issue_selections_without_deduction (user_id, issue_id_without_deduction) VALUES
+    `;
+      const args4 = issueIdsWithoutDeduction.reduce(
+        (acc: number[], issueIdWithoutDeduction, index) => {
+          if (index < issueIdsWithoutDeduction.length - 1) q4 += `(?, ?), `;
+          acc.push(userId, issueIdWithoutDeduction);
+          return acc;
+        },
+        [],
+      );
+      q4 += `(?, ?);`;
+      result.push(await conn.query(q4, args4));
+    }
     await conn.commit();
     return result;
   } catch (e) {

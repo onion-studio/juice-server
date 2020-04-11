@@ -75,9 +75,16 @@ const add = async (req: Request, res: Response): Promise<void> => {
   const selectedIssueIds = selectedIssueIdsString
     .split(',')
     .map((id: string): number => Number(id));
+  let issueIdsWithoutDeduction;
+  if (req.body.issue_ids_without_deduction) {
+    issueIdsWithoutDeduction = req.body.issue_ids_without_deduction
+      .split(',')
+      .map((id: string): number => Number(id));
+  }
   await resultLib.add({
     userId,
     issueIds: selectedIssueIds,
+    issueIdsWithoutDeduction: issueIdsWithoutDeduction ? issueIdsWithoutDeduction : null,
     pledgeIds: selectedPledgeIds,
     ageStart: personal.ageStart,
     ageEnd: personal.ageEnd,
