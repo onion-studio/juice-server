@@ -19,6 +19,7 @@ const whiteList = [
   'https://juice.vote',
   'http://localhost:3000',
   'http://192.168.21.9:3000',
+  'https://juice.onion-studio.com:3003',
 ];
 const corsOptions = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
