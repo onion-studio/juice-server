@@ -26,7 +26,8 @@ const corsOptions = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   origin: (origin: any, cb: any): void => {
     if (whiteList.indexOf(origin) !== -1) {
-      cb(null, true);
+	    console.log('origin ', origin)
+      	 cb(null, true);
     } else {
       cb(new Error('Not allowed by CORS'));
     }
