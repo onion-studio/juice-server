@@ -114,7 +114,7 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
   `;
   const args = [pledgeIds];
   const partiesByPledge: PartyByPledgeId[] = await poolQuery(qParty, args);
-  const partiesWithVotesMap: PartyWithCount[] = _.chain(partiesByPledge)
+  const partiesWithVotes = _.chain(partiesByPledge)
     .reduce((result: PartiesWithVotesMap, p) => {
       result[p.id] = {
         id: p.id,
@@ -123,8 +123,8 @@ const getJuice = async (pledgeIds: Array<number>): Promise<Juice> => {
       };
       return result;
     }, {})
-    .orderBy('voteCount', 'desc')
     .value();
+  const partiesWithVotesMap = _.orderBy(partiesWithVotes, 'voteCount', 'desc');
 
   const qJuice = `
     SELECT *
