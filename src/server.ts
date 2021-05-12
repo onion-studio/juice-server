@@ -102,21 +102,4 @@ app.get(
   }),
 );
 
-if (process.env.NODE_ENV === 'production') {
-  require('greenlock-express')
-    .init({
-      packageRoot: path.resolve(__dirname, '..'),
-      configDir: './greenlock.d',
-
-      // contact for security and critical bug notices
-      maintainerEmail: 'onionstudio.kr@gmail.com',
-
-      // whether or not to run at cloudscale
-      cluster: false,
-    })
-    // Serves on 80 and 443
-    // Get's SSL certificates magically!
-    .serve(app);
-} else {
-  app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-}
+app.listen(port, () => console.log(`Juice server listening on port ${port}!`));
