@@ -5,7 +5,7 @@ import initLib from '../model/init';
 
 const add = async (req: Request, res: Response): Promise<void> => {
   const token = uuidv1();
-  const now = moment.utc().format();
+  const now = moment.utc().format('YYYY/MM/DD HH:mm:ss');
   try {
     await initLib.add(token, now);
     res.json({
