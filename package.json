@@ -30,7 +30,7 @@
     "express-rate-limit": "^5.1.1",
     "greenlock-express": "^4.0.3",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
     "promise-mysql": "^4.1.3",
